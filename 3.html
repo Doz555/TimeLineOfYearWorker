@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="th">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Doze Timeline Report</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+         :root {
+            --primary: #4361ee;
+            --primary-light: #e0e7ff;
+            --success: #06d6a0;
+            --warning: #ffd166;
+            --danger: #ef476f;
+            --purple: #7209b7;
+            --dark: #2b2d42;
+            --gray: #8d99ae;
+        }
+        
+        body {
+        background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+        /* **เปลี่ยนตรงนี้** */
+        font-family: 'Sarabun', sans-serif; 
+        color: var(--dark);
+        min-height: 100vh;
+        padding: 20px 0;
+    }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding:0.5rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(67, 97, 238, 0.18);
+            border: 1px solid rgba(255, 255, plateau, 0.2);
+        }
+        
+        .header h1 {
+            font-size: 2.6rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #4361ee, #7209b7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+        
+        .header p {
+            color: var(--gray);
+            font-size: 1.2rem;
+            margin-top: 0.8rem;
+        }
+        
+     /*
+ * ส่วนนี้คือการแก้ไขสำหรับ month-grid และ month-card
+ * เพื่อให้แสดงผลเป็นบรรทัดเดียว (แนวนอน) และมีขนาดกะทัดรัด
+ */
+.month-grid {
+    /* * ใช้ Flexbox เพื่อให้การ์ดเรียงในบรรทัดเดียว และกำหนดให้ wrap เมื่อพื้นที่ไม่พอ
+     * และใช้ flex-grow/flex-basis เพื่อให้การ์ดมีขนาดเท่ากัน และจัดการพื้นที่ได้อย่างดี 
+     */
+    display: flex;
+    flex-wrap: wrap; /* อนุญาตให้ขึ้นบรรทัดใหม่เมื่อพื้นที่ไม่พอ */
+    gap: 0.5rem; /* ลดระยะห่าง */
+    margin-bottom: 0.5rem; /* ลดระยะห่างด้านล่าง */
+}
+
+.month-card {
+    /* ใช้ flex-basis เพื่อกำหนดขนาดเริ่มต้นและ flex-grow เพื่อขยายให้เต็มพื้นที่ */
+    flex: 1 1 120px; /* กำหนดให้แต่ละการ์ดอย่างน้อย 120px, และขยายเท่า ๆ กัน */
+    max-width: 250px; /* จำกัดความกว้างสูงสุดเพื่อให้ไม่ใหญ่จนเกินไปบนจอใหญ่ */
+    background: white;
+    border-radius: 12px; /* ลดรัศมีมุม */
+    padding: 0.8rem 1.2rem; /* ลด padding ลง */
+    cursor: pointer;
+    transition: all 0.4s ease;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); /* ลดเงา */
+    border: 1px solid #e0e7ff;
+    position: relative;
+    overflow: hidden;
+}
+
+.month-card:hover {
+    /* ปรับ animation hover ให้ลดลงตามขนาดใหม่ */
+    transform: translateY(-5px) scale(1.02); 
+    box-shadow: 0 10px 20px rgba(67, 97, 238, 0.25);
+}
+
+.month-card-title {
+    font-size: 1.1rem; /* ลดขนาดชื่อเดือน */
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.2rem;
+}
+
+.month-card-info {
+    font-size: 0.9rem; /* ลดขนาดจำนวนรายการ */
+    color: var(--primary);
+    font-weight: 500;
+    margin-top: 0.2rem;
+}
+        .month-card:hover::before {
+            width: 100%;
+            opacity: 0.12;
+        }
+        
+        .month-card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .month-card-info {
+            font-size: 1.2rem;
+            color: var(--primary);
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+        
+        .timeline-view {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            display: none;
+            animation: fadeIn 0.6s ease;
+        }
+        
+        .timeline-view.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+        
+        .timeline-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 3px solid #e0e7ff;
+        }
+        
+        .timeline-header h2 {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+        
+        .btn-close-timeline {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: none;
+            border-radius: 14px;
+            padding: 0.7rem 1.5rem;
+            font-weight: 500;
+        }
+        
+        .btn-close-timeline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .calendar-wrapper {
+            overflow-x: auto;
+            border-radius: 14px;
+            border: 1px solid #e0e7ff;
+            margin-bottom: 2rem;
+        }
+        
+        .timeline-table {
+            min-width: 800px;
+        }
+        
+        .timeline-table th {
+            background: linear-gradient(90deg, #4361ee12, #7209b712);
+            font-weight: 600;
+            text-align: center;
+            padding: 1rem 0.4rem;
+            font-size: 0.95rem;
+            min-width: 110px;
+        }
+        
+        .timeline-table th.sunday {
+            background: #ffebee;
+            color: #c2185b;
+            min-width: 40px;
+            padding: 1rem 0.2rem;
+            font-size: 0.7rem;
+            color: transparent;
+        }
+        
+        .timeline-table td {
+            height: auto;
+            vertical-align: top;
+            padding: 4px 2px;
+            position: relative;
+        }
+        
+        .day-col.sunday {
+            background: #fff5f5;
+        }
+        
+        .event-cell {
+            background: var(--primary);
+            color: white;
+            padding: 3px 4px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 6px 16px rgba(67, 97, 238, 0.35);
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: normal;
+        }
+        
+        .event-cell:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 12px 25px rgba(67, 97, 238, 0.45);
+        }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 0.5rem;
+            background: #f8f9ff;
+            border-radius: 14px;
+            border: 2px dashed #c0c4ff;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 500;
+        }
+        
+        .legend-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 8px;
+        }
+        /* Modal */
+        
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 1rem;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            animation: pop 0.4s ease;
+        }
+        
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .modal-header {
+            padding: 2rem 2rem 1rem;
+        }
+        
+        .modal-title {
+            font-size: 1.7rem;
+            font-weight: 600;
+        }
+        
+        .modal-body {
+            padding: 0 2rem 1.5rem;
+        }
+        
+        .modal-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--gray);
+            letter-spacing: 0.8px;
+            margin-bottom: 0.4rem;
+        }
+        
+        .modal-value {
+            font-size: 1.15rem;
+            padding: 0.8rem 1.2rem;
+            background: #f8f9ff;
+            border-radius: 12px;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .type-badge {
+            display: inline-block;
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        .modal-footer {
+            padding: 0 2rem 2rem;
+            text-align: right;
+        }
+        
+        .btn-close-modal {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 0.8rem 2rem;
+            font-weight: 500;
+        }
+        
+        .btn-close-modal:hover {
+            background: #3a56d4;
+        }
+        
+        .layout-toggle {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        
+        .layout-btn {
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .layout-btn:hover {
+            background: var(--primary-light);
+        }
+        
+        .layout-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container-fluid px-4">
+        <div class="header">
+            <h1 style="    padding: 9.5px;">รายงานการทำงาน ปี .....</h1>
+            <div class="layout-toggle">
+                <button class="layout-btn" onclick="goToLayout('2.html')">📊 แบบมัลติแถว</button>
+                <button class="layout-btn active" onclick="goToLayout('3.html')">📋 แบบเรียงลำดับ</button>
+            </div>
+        </div>
+
+        <div id="monthsView" class="month-grid"></div>
+     <div class="legend" id="legend"></div>
+        <div id="timelineView" class="timeline-view">
+            <div class="timeline-header" style="align-items: center;">
+                <h2 id="timelineTitle"></h2>               
+            </div>
+
+            <div class="calendar-wrapper">
+                <table class="table timeline-table table-bordered mb-0" id="calendarTable"></table>
+            </div>
+
+
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTypeValue">รายการ</h3>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <div class="modal-label">ประเภท</div>
+                    <div class="modal-value"><span class="type-badge" id="modalType">อื่นๆ</span></div>
+                </div>
+      
+                <div class="mb-3">
+                    <div class="modal-label">วันเริ่ม</div>
+                    <div class="modal-value" id="modalStartDate">-</div>
+                </div>
+                <div class="mb-3">
+                    <div class="modal-label">วันสิ้นสุด</div>
+                    <div class="modal-value" id="modalEndDate">-</div>
+                </div>
+                <div class="mb-3">
+                    <div class="modal-label">จำนวนวัน</div>
+                    <div class="modal-value" id="modalDays" style="font-weight: 600; color: #4361ee;">-</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-close-modal" onclick="closeModal()">ปิด</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+    <script>
+        // ====================== ทุกอย่างอยู่ตรงนี้ครบหมด ======================
+        let events = [];
+        let groupedByMonth = {};
+        let typeToColor = {};
+        let typeWork = {
+            "HK": '#4361ee',
+            "IT": '#39bb43',
+            "PAS": '#ffd166',
+            "APP": '#ef476f',
+            "HT_Report": '#4ecdc4',
+        }
+     
+        let typeWork_text = {
+            "HK": 'ระบบแม่บ้าน',
+            "IT": 'ระบบไอที',
+            "PAS": 'ระบบอนุมัติ',
+            "APP": 'แอปพลิเคชัน',
+            "HT_Report": 'รายงานโรงแรม',
+        }   
+
+        function colorFromString(str) {
+            return typeWork[str];         
+        }
+
+        function parseDate(s) {
+            if (!s) return null;
+            s = s.trim().replace(/\./g, '-').replace(/\//g, '-');
+            const parts = s.split(' ')[0].split('-');
+            if (parts.length >= 3) {
+                const y = parseInt(parts[0], 10);
+                const m = parseInt(parts[1], 10) - 1;
+                const d = parseInt(parts[2], 10);
+                if (!isNaN(y) && !isNaN(m) && !isNaN(d)) return new Date(y, m, d);
+            }
+            const dt = new Date(s);
+            return isNaN(dt.getTime()) ? null : dt;
+        }
+
+        function formatMonthKey(d) {
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+        }
+
+        function monthLabelFromKey(key) {
+            const [y, m] = key.split('-');
+            const date = new Date(y, parseInt(m) - 1, 1);
+            return date.toLocaleString('th-TH', {
+                month: 'long',
+            });
+        }
+
+        function daysInMonth(y, m) {
+            return new Date(y, m + 1, 0).getDate();
+        }
+
+        function formatDate(d) {
+            if (!d) return '';
+            return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+        }
+
+        function escapeHtml(s) {
+            if (!s) return '';
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function loadFromCsvText(text) {
+            const res = Papa.parse(text.trim(), {
+                skipEmptyLines: true
+            });
+            const rows = res.data.map(r => r.map(c => (c || '').trim())).filter(r => r.length >= 3);
+
+            events = [];
+            rows.forEach((r, idx) => {
+                const type = r[0] || 'อื่นๆ';
+                const textDesc = r[1] || '';
+                const start = parseDate(r[2]);
+                const end = r[3] ? parseDate(r[3]) : start;
+
+                if (!start && !end) return;
+
+                const s = start || end;
+                const e = end || start || s;
+
+                events.push({
+                    type,
+                    text: textDesc,
+                    start: s,
+                    end: e,
+                    originalIndex: idx
+                });
+            });
+
+            events.sort((a, b) => a.start - b.start || a.originalIndex - b.originalIndex);
+            rebuildGroups();
+            renderMonths();
+            renderLegend();
+        }
+
+        function rebuildGroups() {
+            groupedByMonth = {};
+            typeToColor = {};
+
+            events.forEach(ev => {
+                if (ev.end < ev.start)[ev.start, ev.end] = [ev.end, ev.start];
+
+                let cur = new Date(ev.start.getFullYear(), ev.start.getMonth(), 1);
+                const lastMonth = new Date(ev.end.getFullYear(), ev.end.getMonth(), 1);
+
+                while (cur <= lastMonth) {
+                    const key = formatMonthKey(cur);
+                    if (!groupedByMonth[key]) groupedByMonth[key] = [];
+
+                    const monthStart = new Date(cur.getFullYear(), cur.getMonth(), 1);
+                    const monthEnd = new Date(cur.getFullYear(), cur.getMonth(), daysInMonth(cur.getFullYear(), cur.getMonth()));
+
+                    const s = ev.start > monthStart ? ev.start : monthStart;
+                    const e = ev.end < monthEnd ? ev.end : monthEnd;
+
+                    groupedByMonth[key].push({...ev,
+                        start: new Date(s),
+                        end: new Date(e),
+                        originalStart: new Date(ev.start),
+                        originalEnd: new Date(ev.end)
+                    });
+
+                    cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1);
+                }
+
+                if (!typeToColor[ev.type]) typeToColor[ev.type] = colorFromString(ev.type);
+            });
+        }
+
+        function renderLegend() {
+            const wrap = $('#legend').empty();
+            wrap.append('<strong class="me-3">ประเภท:</strong>');
+            Object.keys(typeToColor).forEach(t => {
+                const c = typeToColor[t];
+                const typeText = typeWork_text[t] || t;
+                wrap.append(`<div class="legend-item"><span class="legend-dot" style="background:${c}"></span><span>${typeText}</span></div>`);
+            });
+        }
+
+        function renderMonths() {
+            const wrap = $('#monthsView').empty();
+            const keys = Object.keys(groupedByMonth).sort();
+
+            if (!keys.length) {
+                wrap.html('<div class="text-center p-5 text-muted" style="grid-column:1/-1;">ยังไม่มีข้อมูล — วางไฟล์ data.csv ในโฟลเดอร์เดียวกัน</div>');
+                return;
+            }
+
+            keys.forEach(key => {
+                const items = groupedByMonth[key];
+                const label = monthLabelFromKey(key);
+                const card = $(`
+                    <div class="month-card" onclick="showMonth('${key}')">
+                        <div class="month-card-title">${label}</div>
+                        <div class="month-card-info">${items.length} รายการ</div>
+                    </div>
+                `);
+                wrap.append(card);
+            });
+        }
+
+        function showMonth(key) {
+            const arr = (groupedByMonth[key] || []).slice();
+            if (!arr.length) return;
+
+            const [y, m] = key.split('-');
+            const year = parseInt(y, 10);
+            const monthIndex = parseInt(m, 10) - 1;
+            const days = daysInMonth(year, monthIndex);
+
+            $('#timelineTitle').text(monthLabelFromKey(key));
+
+            // Simple stacking: render each event on its own table row (one-per-row)
+            arr.sort((a, b) => a.start - b.start || a.originalIndex - b.originalIndex);
+
+            const table = $('#calendarTable').empty();
+            const thead = $('<thead><tr></tr></thead>');
+            const headRow = thead.find('tr');
+
+            for (let d = 1; d <= days; d++) {
+                const date = new Date(year, monthIndex, d);
+                const isSunday = date.getDay() === 0;
+                if (isSunday) {
+                    headRow.append(`<th class="sunday">●</th>`);
+                } else {
+                    headRow.append(`<th>${d}/${String(monthIndex+1).padStart(2,'0')}/${year}</th>`);
+                }
+            }
+            table.append(thead);
+
+            const tbody = $('<tbody></tbody>');
+
+            // For each event, create a dedicated row and place the event at its start position
+            arr.forEach(clippedEv => {
+                const tr = $('<tr></tr>');
+                const startIdx = clippedEv.start.getDate() - 1;
+                const endIdx = clippedEv.end.getDate() - 1;
+
+                // empty cells before the event
+                for (let i = 0; i < startIdx; i++) {
+                    const isSunday = new Date(year, monthIndex, i + 1).getDay() === 0;
+                    tr.append(`<td class="day-col empty${isSunday?' sunday':''}"></td>`);
+                }
+
+                const span = endIdx - startIdx + 1;
+                const color = typeToColor[clippedEv.type];
+                const originalStart = clippedEv.originalStart || clippedEv.start;
+                const originalEnd = clippedEv.originalEnd || clippedEv.end;
+                const content = `
+                        <div class="event-cell" style="background:${color}" 
+                             onclick="showEventModal({type:'${escapeHtml(clippedEv.type)}', text:'${escapeHtml(clippedEv.text)}', start:'${formatDate(originalStart)}', end:'${formatDate(originalEnd)}'})">
+                            ${escapeHtml(clippedEv.text)}
+                        </div>`;
+
+                const isSundayStart = new Date(year, monthIndex, startIdx + 1).getDay() === 0;
+                tr.append(`<td colspan="${span}" class="day-col${isSundayStart?' sunday':''}">${content}</td>`);
+
+                // empty cells after the event
+                for (let i = endIdx + 1; i < days; i++) {
+                    const isSunday = new Date(year, monthIndex, i + 1).getDay() === 0;
+                    tr.append(`<td class="day-col empty${isSunday?' sunday':''}"></td>`);
+                }
+
+                tbody.append(tr);
+            });
+
+            table.append(tbody);
+            $('#timelineView').addClass('active');
+        }
+
+        function showEventModal(data) {
+            const typeText = typeWork_text[data.type] || data.type;
+            $('#modalType').css('background', typeToColor[data.type] || colorFromString(data.type)).text(typeText);
+            $('#modalTypeValue').text(data.text || 'ไม่มีชื่อ');
+          
+            $('#modalStartDate').text(data.start);
+            $('#modalEndDate').text(data.end || data.start);
+
+            // คำนวณจำนวนวัน
+            const startParts = data.start.split('/');
+            const endParts = data.end.split('/');
+            const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+            const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2]);
+            const daysCount = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+
+            $('#modalDays').text(daysCount + ' วัน');
+            $('#modalOverlay').addClass('active');
+        }
+
+        function closeModal() {
+            $('#modalOverlay').removeClass('active');
+        }
+
+        function backToMonths() {
+            $('#timelineView').removeClass('active');
+        }
+
+        function autoLoadCSV() {
+            fetch('data.csv')
+                .then(r => r.text())
+                .then(text => loadFromCsvText(text))
+                .catch(err => {
+                    console.log('ไม่พบไฟล์ data.csv หรือเกิดข้อผิดพลาด:', err);
+                    $('#monthsView').html('<div class="text-center p-5 text-danger" style="grid-column:1/-1;">ไม่พบไฟล์ data.csv ในโฟลเดอร์นี้</div>');
+                });
+        }
+
+        $(function() {
+            autoLoadCSV();
+        });
+        
+        function goToLayout(filename) {
+            window.location.href = filename;
+        }
+    </script>
+</body>
+
+</html>

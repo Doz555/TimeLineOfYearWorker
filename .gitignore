@@ -1,0 +1,45 @@
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Build and Dependencies
+node_modules/
+dist/
+build/
+
+# Backup and Temporary Files
+*.bak
+*.backup
+data_backup*.csv
+*.tmp
+*.log
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Sensitive Data (if applicable)
+.env
+.env.local
+config.local.json
+
+# IDE Specific
+*.code-workspace
+
+# Testing
+.nyc_output/
+coverage/
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
