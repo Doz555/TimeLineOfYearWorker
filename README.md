@@ -35,6 +35,9 @@ cd TimeLineOfYearWorker
 
 3. Data is loaded from `data.csv` automatically
 
+### 🔗 Optional: Use Google Sheets Instead of CSV
+Want to use Google Sheets for real-time data updates? See [GOOGLE_SHEETS_GUIDE.md](./GOOGLE_SHEETS_GUIDE.md) for step-by-step instructions.
+
 ## 📁 Project Structure
 
 ```
