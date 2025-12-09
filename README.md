@@ -20,8 +20,8 @@
 ### Usage
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/TimeLineOfYear.git
-cd TimeLineOfYear
+git clone https://github.com/yourusername/TimeLineOfYearWorker.git
+cd TimeLineOfYearWorker
 ```
 
 2. Open any HTML file in your web browser:
@@ -33,7 +33,7 @@ cd TimeLineOfYear
 ## 📁 Project Structure
 
 ```
-TimeLineOfYear/
+TimeLineOfYearWorker/
 ├── 2.html              # Timeline Report Version 2
 ├── 3.html              # Timeline Report Version 3
 ├── data.csv            # Project timeline data

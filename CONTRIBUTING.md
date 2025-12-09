@@ -49,8 +49,8 @@ We are committed to providing a welcoming and inspiring community for all. Pleas
    - Click the "Fork" button on GitHub
    - Clone your fork to your local machine:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/TimeLineOfYear.git
-   cd TimeLineOfYear
+   git clone https://github.com/YOUR_USERNAME/TimeLineOfYearWorker.git
+   cd TimeLineOfYearWorker
    ```
 
 2. **Create a Branch**
@@ -458,7 +458,7 @@ When contributing, please update relevant documentation:
 
 Keep the project organized:
 ```
-TimeLineOfYear/
+TimeLineOfYearWorker/
 ├── *.html              # Main timeline views
 ├── data.csv            # Timeline data
 ├── README.md           # Project overview
